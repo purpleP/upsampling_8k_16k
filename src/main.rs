@@ -25,8 +25,15 @@ fn dot_product(a: &[f64], b: &[f64]) -> f64 {
 fn polyphase_fir_filter_8000_to_16000(a: &[f64], kernel: &[f64], out: &mut [f64]) {
     a.windows(32)
         .flat_map(|w| {
+            let mut temp = [0.0;16];
+            w[0..15]
+                .iter()
+                .zip(w[15..].iter().rev())
+                .map(|(x, y)| x + y)
+                .enumerate()
+                .for_each(|(i, x)| temp[i] = x);
             let i = unsafe { w.get_unchecked(15) };
-            iter::once(*i).chain(iter::once(dot_product(w, kernel)))
+            iter::once(*i).chain(iter::once(dot_product(&temp, kernel)))
         })
         .enumerate()
         .for_each(|(i, x)| out[i] = x)
@@ -51,22 +58,6 @@ fn main() {
         0.11944349110699277,
         -0.20739640614492658,
         0.6350028611580476,
-        0.6350028611580476,
-        -0.20739640614492658,
-        0.11944349110699277,
-        -0.080191329559525,
-        0.05737093606609404,
-        -0.04221487621722491,
-        0.031371582397608344,
-        -0.023280007063154706,
-        0.017111662990475538,
-        -0.012372412653986187,
-        0.00874187972461201,
-        -0.005989992008119632,
-        0.003943971607032482,
-        -0.002460787836795292,
-        0.0014245757701187292,
-        -0.0009302717143512643,
     ];
     let spec = hound::WavSpec {
         channels: 1,
