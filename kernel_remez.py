@@ -1,11 +1,13 @@
+import sys
 import numpy as np
 from scipy import signal
 import matplotlib.pyplot as plt
 
-def plot_response(fs, w, h, title):
-    "Utility function to plot response functions"
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
+def plot_response(taps, fs, w, h, title):
+    fig, (ax, tx) = plt.subplots(2)
+    tx.set_title('Taps')
+    tx.plot(taps)
+    tx.grid(True)
     ax.plot(0.5*fs*w/np.pi, 20*np.log10(np.abs(h)))
     ax.set_xlim(0, 0.5*fs)
     ax.grid(True)
@@ -24,8 +26,8 @@ taps = signal.remez(numtaps, bands, desired, [1, 1], fs=fs, maxiter=20000)
 taps[abs(taps) <= 1e-4] = 0.
 w, h = signal.freqz(taps, [1], worN=2000)
 reversed = taps[::-1]
-np.set_printoptions(precision=20)
+np.set_printoptions(precision=1000, linewidth=1)
 print('taps', taps)
 print('polyphase', np.array2string(reversed[0::2], separator=','))
-plot_response(fs, w, h, "Low-pass Filter")
-# plt.show()
+plot_response(taps, fs, w, h, "Low-pass Filter")
+plt.show()
