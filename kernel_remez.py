@@ -27,11 +27,26 @@ taps[np.abs(taps) < 1e-5] = 0.0
 w, h = signal.freqz(taps, [1], worN=2000)
 reversed = taps[::-1]
 np.set_printoptions(precision=1000, linewidth=1)
-taps_i16 = (taps * 2**15).astype('int16')
+taps_i16 = (taps * 2**14).astype('int16')
 taps_i16_reversed = taps_i16[::-1]
+ts = taps_i16_reversed[::2]
+sum_of_positive_coefficients = ts[ts >= 0].sum()
+sum_of_negative_coefficients = ts[ts < 0].sum()
+min_output = (
+    sum_of_positive_coefficients * -(2 ** 15 - 1)
+    + sum_of_negative_coefficients * (2 ** 15 - 1)
+)
+max_output = (
+    sum_of_positive_coefficients * (2 ** 15 - 1)
+    + sum_of_negative_coefficients * -(2 ** 15 - 1)
+)
 print('taps', taps)
 print('integer taps', np.array2string(taps_i16))
 print('halfband', np.array2string(reversed[0::2], separator=','))
 print('halfband integers', np.array2string(taps_i16_reversed[0::2], separator=','))
+print('sum of positive', sum_of_positive_coefficients)
+print('sum of negative', sum_of_negative_coefficients)
+print('min output', min_output)
+print('max output', max_output)
 plot_response(taps, fs, w, h, "Low-pass Filter")
 # plt.show()

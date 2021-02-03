@@ -21,7 +21,7 @@ use std::iter;
 fn dot_product(a: &[i16], b: &[i16]) -> i32 {
     a.iter()
         .zip(b)
-        .map(|(&x, &y)| (x as i32) * (y as i32))
+        .map(|(&x, &y)| ((x as i32) * (y as i32)))
         .sum()
 }
 
@@ -29,7 +29,7 @@ fn half_band_fir_filter(a: &[i16], kernel: &[i16], out: &mut [i16]) {
     a.windows(32)
         .flat_map(|w| {
             let i = unsafe { w.get_unchecked(15) };
-            iter::once(*i).chain(iter::once((dot_product(w, kernel) >> 15) as i16))
+            iter::once(*i).chain(iter::once((dot_product(w, kernel) >> 14) as i16))
         })
         .enumerate()
         .for_each(|(i, x)| out[i] = x)
@@ -38,9 +38,8 @@ fn half_band_fir_filter(a: &[i16], kernel: &[i16], out: &mut [i16]) {
 fn main() {
     let input = std::env::args().nth(1).unwrap();
     let kernel = [
-        -30, 46, -80, 129, -196, 286, -405, 560, -762, 1027, -1383, 1879, -2627, 3913, -6795,
-        20807, 20807, -6795, 3913, -2627, 1879, -1383, 1027, -762, 560, -405, 286, -196, 129, -80,
-        46, -30,
+        -15, 23, -40, 64, -98, 143, -202, 280, -381, 513, -691, 939, -1313, 1956, -3397, 10403,
+        10403, -3397, 1956, -1313, 939, -691, 513, -381, 280, -202, 143, -98, 64, -40, 23, -15,
     ];
     let spec = hound::WavSpec {
         channels: 1,
