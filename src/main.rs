@@ -29,7 +29,7 @@ fn half_band_fir_filter(a: &[i16], kernel: &[i16], out: &mut [i16]) {
     a.windows(32)
         .flat_map(|w| {
             let i = unsafe { w.get_unchecked(15) };
-            iter::once(*i).chain(iter::once((dot_product(w, kernel) >> 14) as i16))
+            iter::once(*i >> 2).chain(iter::once((dot_product(w, kernel) >> 16) as i16))
         })
         .enumerate()
         .for_each(|(i, x)| out[i] = x)
